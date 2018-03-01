@@ -259,6 +259,11 @@ def full_chain():
     }
     return jsonify(response), 200
 
+@app.route('/chain/size',methods=['GET'])
+def chain_size():
+    response = {
+        'length':len(blockchain.chain)
+    }
 
 @app.route('/nodes/register', methods=['POST'])
 def register_nodes():
