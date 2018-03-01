@@ -79,22 +79,26 @@ class Blockchain:
         # We're only looking for chains longer than ours
         max_length = len(self.chain)
 
-        # Grab and verify the chains from all the nodes in our network
+        # Grab and verify the chain sizes from all the nodes in our network
         for node in neighbours:
-            response = requests.get(f'http://{node}/chain')
+            response = requests.get(f'http://{node}/chain/size')
             if response.status_code == 200:
                 length = response.json()['length']
-                chain = response.json()['chain']
+                # If one's blockchain is bigger than or equal to ours, now we look for the blockchain
+                if length >= max_length:
+                    response = requests.get(f'http://{node}/chain')
+                    chain = response.json()['chain']
 
-                # Check if the length is longer and the chain is valid
-                if length > max_length and self.valid_chain(chain):
-                    max_length = length
-                    new_chain = chain
-
-                if length == max_length and self.valid_chain(chain):
-                    new_timestamp = chain[-1]['timestamp']
-                    if(new_timestamp < last_timestamp):
+                    # Ok if the blockchain is bigger, just accept it :(
+                    if length > max_length and self.valid_chain(chain):
+                        max_length = length
                         new_chain = chain
+
+                    # But if the blockchain is th same size, but ours is newer :(
+                    if length == max_length and self.valid_chain(chain):
+                        new_timestamp = chain[-1]['timestamp']
+                        if(new_timestamp < last_timestamp):
+                            new_chain = chain
 
 
         # Replace our chain if we discovered a new, valid chain longer than ours
@@ -251,13 +255,23 @@ def new_transaction():
     return jsonify(response), 201
 
 
-@app.route('/chain', methods=['GET'])
+@app.route('/chain')
 def full_chain():
     response = {
         'chain': blockchain.chain,
         'length': len(blockchain.chain),
-    }
-    return jsonify(response), 200
+        }
+    return jsonify(response),200
+
+@app.route('/chain/block', methods=['GET'])
+def get_block():
+    values = request.args
+    if values['index']:
+        response = {
+            'chain': blockchain.chain[int(values['index'])-1],
+            }
+        return jsonify(response),200
+
 
 @app.route('/chain/size',methods=['GET'])
 def chain_size():
