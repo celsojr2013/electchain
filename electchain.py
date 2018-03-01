@@ -264,6 +264,7 @@ def chain_size():
     response = {
         'length':len(blockchain.chain)
     }
+    return jsonify(response),200
 
 @app.route('/nodes/register', methods=['POST'])
 def register_nodes():
