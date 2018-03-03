@@ -3,6 +3,7 @@ import json
 from time import time
 from urllib.parse import urlparse
 from uuid import uuid4
+from multiprocessing import Pool
 
 import requests
 from flask import Flask, jsonify, request
@@ -179,13 +180,21 @@ class Blockchain:
         last_hash = self.hash(last_block)
 
         proof = 0
-        while self.valid_proof(last_proof, proof, last_hash) is False:
-            proof += 1
 
+        start_time = time()
+        while self.valid_proof(self,last_proof, proof, last_hash) is False:
+            proof += 1
+        elapsed_time = time() - start_time
+
+        print(int(proof/elapsed_time),elapsed_time)
         return proof
 
     @staticmethod
-    def valid_proof(last_proof, proof, last_hash):
+    def guessHash(guess):
+        return hashlib.sha256(guess).hexdigest()
+
+    @staticmethod
+    def valid_proof(self,last_proof, proof, last_hash):
         """
         Validates the Proof
 
@@ -197,8 +206,10 @@ class Blockchain:
         """
 
         guess = f'{last_proof}{proof}{last_hash}'.encode()
-        guess_hash = hashlib.sha256(guess).hexdigest()
-        return guess_hash[:5] == "00000"
+
+        guess_hash = self.guessHash(guess)
+
+        return guess_hash[:6] == '000000'
 
 
 # Instantiate the Node
