@@ -31,7 +31,7 @@ def createdb():
         reciever varchar(256) NOT NULL,
         signature varchar(256) NOT NULL,
         ammount real NOT NULL,
-        ballot varchar(256),
+        poll varchar(256),
         createdat timestamp,
         fee real NOT NULL,
         block varchar(256)
@@ -43,6 +43,8 @@ def createdb():
     CREATE TABLE poll (
         hash varchar(256) NOT NULL PRIMARY KEY,
         creator varchar(256) NOT NULL,
+        signature varchar(256) NOT NULL,
+        createdat timestamp,
         name TEXT NOT NULL,
         description TEXT,
         startat timestamp,
@@ -62,21 +64,6 @@ def createdb():
         signature varchar(256) NOT NULL,
         poll varchar(256),
         createdat timestamp,
-        block varchar(256)
-    );
-    """)
-
-    # criando a tabela poll
-    cursor.execute("""
-    CREATE TABLE poll (
-        hash varchar(256) NOT NULL PRIMARY KEY,
-        creator varchar(256) NOT NULL,
-        name TEXT NOT NULL,
-        description TEXT,
-        startat timestamp,
-        endat timestamp,
-        tip real NOT NULL,
-        nominees BLOB NOT NULL,
         block varchar(256)
     );
     """)
