@@ -1,4 +1,5 @@
 import hashlib
+import math
 import json
 from time import time
 from urllib.parse import urlparse
@@ -228,12 +229,17 @@ def mine():
     last_block = blockchain.last_block
     proof = blockchain.proof_of_work(last_block)
 
+    #Hardcoded a drop of 5% of the Initial Rewards of 200 ELC$ at each 50000 blocks
+    block_cycles = math.floor(len(blockchain.chain)/5)
+    reward_discount = (0.95) ** block_cycles
+    reward = 200 * reward_discount
+
     # We must receive a reward for finding the proof.
     # The sender is "0" to signify that this node has mined a new coin.
     blockchain.new_transaction(
         sender="0",
         recipient=node_identifier,
-        amount=1,
+        amount=reward,
     )
 
     # Forge the new Block by adding it to the chain
